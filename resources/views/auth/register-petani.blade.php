@@ -88,6 +88,11 @@
                     Register Pembeli
                 </a>
             </div>
+            <div class="mt-8 text-center">
+                <a href="/" class="text-gray-500 text-base hover:text-gray-700 hover:underline">
+                    Kembali ke Beranda
+                </a>
+            </div>
         </div>
 
     </div>

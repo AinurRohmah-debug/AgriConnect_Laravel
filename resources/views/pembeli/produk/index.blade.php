@@ -66,7 +66,7 @@
 
                     <!-- IMAGE -->
                     @if ($item->foto_produk)
-                        <img src="{{ asset('storage/' . $item->foto_produk) }}" class="w-full h-52 object-cover">
+                        <img src="{{ asset('uploads/produk/' . $item->foto_produk) }}" class="w-full h-52 object-cover">
                     @else
                         <div class="w-full h-52 bg-gray-100 flex items-center justify-center text-sm text-gray-400">
                             Tidak ada gambar

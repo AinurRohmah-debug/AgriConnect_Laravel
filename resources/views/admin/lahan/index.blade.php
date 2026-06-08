@@ -42,8 +42,8 @@
                             <!-- FOTO LAHAN -->
                             <td class="p-4">
                                 @if ($l->foto_lahan)
-                                    <img src="{{ asset('storage/' . $l->foto_lahan) }}"
-                                        class="w-12 h-12 rounded-lg object-cover">
+                                    <img src="{{ asset('uploads/lahan/' . $l->foto_lahan) }}"
+                                        class="w-12 h-12 rounded-lg object-cover" alt="Foto Lahan">
                                 @else
                                     <div class="w-12 h-12 rounded-lg bg-gray-200"></div>
                                 @endif

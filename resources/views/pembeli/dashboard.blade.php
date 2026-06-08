@@ -114,7 +114,7 @@
                                 <div
                                     class="w-full h-36 sm:h-48 bg-gray-50 flex items-center justify-center overflow-hidden">
                                     @if ($produk->foto_produk)
-                                        <img src="{{ asset('storage/' . $produk->foto_produk) }}"
+                                        <img src="{{ asset('uploads/produk/' . $produk->foto_produk) }}"
                                             alt="{{ $produk->nama_produk }}" class="w-full h-full object-cover">
                                     @else
                                         <div
@@ -198,7 +198,7 @@
                             <div>
                                 <div class="w-full h-48 bg-gray-50 flex items-center justify-center overflow-hidden">
                                     @if ($lahan->foto_lahan)
-                                        <img src="{{ asset('storage/' . $lahan->foto_lahan) }}"
+                                        <img src="{{ asset('uploads/lahan/' . $lahan->foto_lahan) }}"
                                             alt="{{ $lahan->komoditas }}" class="w-full h-full object-cover">
                                     @else
                                         <div

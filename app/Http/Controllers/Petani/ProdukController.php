@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Produk;
 use App\Models\ActivityLog;
+use Illuminate\Support\Facades\File;
 
 class ProdukController extends Controller
 {
@@ -39,9 +40,14 @@ class ProdukController extends Controller
             'foto_produk' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $fotoProduk = $request->hasFile('foto_produk')
-            ? $request->file('foto_produk')->store('produk', 'public')
-            : null;
+        $fotoName = null;
+
+        // SIMPAN KE public/uploads/produk
+        if ($request->hasFile('foto_produk')) {
+            $file = $request->file('foto_produk');
+            $fotoName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/produk'), $fotoName);
+        }
 
         $produk = Produk::create([
             'petani_id' => session('user.id'),
@@ -51,7 +57,7 @@ class ProdukController extends Controller
             'stok' => $request->stok,
             'satuan' => $request->satuan,
             'deskripsi' => $request->deskripsi,
-            'foto_produk' => $fotoProduk,
+            'foto_produk' => $fotoName,
         ]);
 
         ActivityLog::create([
@@ -65,7 +71,9 @@ class ProdukController extends Controller
 
     public function update(Request $request, $id)
     {
-        $produk = Produk::findOrFail($id);
+        $produk = Produk::where('id', $id)
+            ->where('petani_id', session('user.id'))
+            ->firstOrFail();
 
         $request->validate([
             'nama_produk' => 'required',
@@ -77,12 +85,28 @@ class ProdukController extends Controller
         ]);
 
         $data = $request->only([
-            'nama_produk','kategori','harga','stok','satuan','deskripsi'
+            'nama_produk',
+            'kategori',
+            'harga',
+            'stok',
+            'satuan',
+            'deskripsi'
         ]);
 
+        // UPDATE FOTO
         if ($request->hasFile('foto_produk')) {
-            $data['foto_produk'] = $request->file('foto_produk')
-                ->store('produk', 'public');
+
+            // HAPUS FOTO LAMA
+            if ($produk->foto_produk && File::exists(public_path('uploads/produk/' . $produk->foto_produk))) {
+                File::delete(public_path('uploads/produk/' . $produk->foto_produk));
+            }
+
+            $file = $request->file('foto_produk');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+
+            $file->move(public_path('uploads/produk'), $fileName);
+
+            $data['foto_produk'] = $fileName;
         }
 
         $produk->update($data);
@@ -98,13 +122,20 @@ class ProdukController extends Controller
 
     public function destroy($id)
     {
-        $produk = Produk::findOrFail($id);
+        $produk = Produk::where('id', $id)
+            ->where('petani_id', session('user.id'))
+            ->firstOrFail();
 
         if ($produk->detailPesanan()->exists()) {
             return back()->with(
                 'error',
                 'Produk tidak dapat dihapus karena sudah pernah digunakan dalam transaksi.'
             );
+        }
+
+        // HAPUS FOTO
+        if ($produk->foto_produk && File::exists(public_path('uploads/produk/' . $produk->foto_produk))) {
+            File::delete(public_path('uploads/produk/' . $produk->foto_produk));
         }
 
         $nama = $produk->nama_produk;
@@ -119,14 +150,12 @@ class ProdukController extends Controller
         return redirect('/petani/produk')
             ->with('success', 'Produk berhasil dihapus');
     }
+
     public function edit($id)
     {
-        $produk = Produk::findOrFail($id);
-
-        // optional safety: pastikan hanya milik petani yang login
-        if ($produk->petani_id !== session('user.id')) {
-            abort(403);
-        }
+        $produk = Produk::where('id', $id)
+            ->where('petani_id', session('user.id'))
+            ->firstOrFail();
 
         return view('petani.produk.edit', compact('produk'));
     }

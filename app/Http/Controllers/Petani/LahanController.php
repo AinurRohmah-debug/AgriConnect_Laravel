@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Lahan;
 use App\Models\ActivityLog;
+use Illuminate\Support\Facades\File;
 
 class LahanController extends Controller
 {
@@ -33,7 +34,19 @@ class LahanController extends Controller
             'harga_max' => 'required|numeric|gte:harga_min',
             'estimasi_panen' => 'required|date',
             'deskripsi' => 'required',
+            'foto_lahan' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
+
+        $fotoName = null;
+
+        if ($request->hasFile('foto_lahan')) {
+            $file = $request->file('foto_lahan');
+
+            $fotoName = time() . '_' . $file->getClientOriginalName();
+
+            // SIMPAN KE public/uploads/lahan
+            $file->move(public_path('uploads/lahan'), $fotoName);
+        }
 
         $lahan = Lahan::create([
             'petani_id' => session('user.id'),
@@ -72,6 +85,7 @@ class LahanController extends Controller
             'harga_max' => 'required|numeric|gte:harga_min',
             'estimasi_panen' => 'required|date',
             'deskripsi' => 'required',
+            'foto_lahan' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
         $data = $request->only([
@@ -86,13 +100,20 @@ class LahanController extends Controller
 
         $data['bisa_nego'] = $request->bisa_nego ? 1 : 0;
 
-        // ✅ HANDLE FOTO (INI YANG PENTING)
+        // UPDATE FOTO
         if ($request->hasFile('foto_lahan')) {
-            $data['foto_lahan'] = $request->file('foto_lahan')
-                ->store('lahan', 'public');
-        } else {
-            // ❗ KEEP FOTO LAMA (tidak dihapus)
-            $data['foto_lahan'] = $lahan->foto_lahan;
+
+            // HAPUS FOTO LAMA
+            if ($lahan->foto_lahan && File::exists(public_path('uploads/lahan/' . $lahan->foto_lahan))) {
+                File::delete(public_path('uploads/lahan/' . $lahan->foto_lahan));
+            }
+
+            $file = $request->file('foto_lahan');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+
+            $file->move(public_path('uploads/lahan'), $fileName);
+
+            $data['foto_lahan'] = $fileName;
         }
 
         $lahan->update($data);
@@ -112,19 +133,20 @@ class LahanController extends Controller
             ->where('petani_id', session('user.id'))
             ->firstOrFail();
 
-        // Cegah hapus jika pernah ada pengajuan minat
         if ($lahan->pengajuanMinat()->exists()) {
 
             ActivityLog::create([
                 'user_id' => session('user.id'),
-                'activity' => 'Gagal menghapus lahan: ' . $lahan->komoditas . ' (sudah memiliki pengajuan minat)'
+                'activity' => 'Gagal menghapus lahan: ' . $lahan->komoditas
             ]);
 
             return redirect('/petani/lahan')
-                ->with(
-                    'error',
-                    'Lahan tidak dapat dihapus karena sudah pernah memiliki pengajuan minat dari pembeli.'
-                );
+                ->with('error', 'Lahan tidak dapat dihapus karena sudah memiliki pengajuan minat.');
+        }
+
+        // HAPUS FOTO
+        if ($lahan->foto_lahan && File::exists(public_path('uploads/lahan/' . $lahan->foto_lahan))) {
+            File::delete(public_path('uploads/lahan/' . $lahan->foto_lahan));
         }
 
         $nama = $lahan->komoditas;
@@ -139,6 +161,7 @@ class LahanController extends Controller
         return redirect('/petani/lahan')
             ->with('success', 'Lahan berhasil dihapus');
     }
+
     public function create()
     {
         ActivityLog::create([

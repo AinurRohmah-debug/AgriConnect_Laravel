@@ -80,8 +80,9 @@
                                             <div class="flex items-center gap-4">
 
                                                 @if ($item->produk->foto_produk)
-                                                    <img src="{{ asset('storage/' . $item->produk->foto_produk) }}"
-                                                        class="w-14 h-14 object-cover rounded-lg border border-gray-100">
+                                                    <img src="{{ asset('uploads/produk/' . $item->produk->foto_produk) }}"
+                                                        class="w-14 h-14 object-cover rounded-lg border border-gray-100"
+                                                        alt="{{ $item->produk->nama_produk }}">
                                                 @endif
 
                                                 <div>
@@ -118,7 +119,8 @@
                                                     {{ $item->jumlah }}
                                                 </span>
 
-                                                <form action="/pembeli/keranjang/{{ $item->id }}/tambah" method="POST">
+                                                <form action="/pembeli/keranjang/{{ $item->id }}/tambah"
+                                                    method="POST">
                                                     @csrf
                                                     <button type="submit"
                                                         class="px-3 py-1 text-gray-600 hover:bg-gray-100">

@@ -41,7 +41,7 @@ class AdminDashboardController extends Controller
             ->orderBy('bulan')
             ->pluck('total', 'bulan');
 
-        // ⭐ BARU: DISTRIBUSI STATUS LAHAN
+        // DISTRIBUSI STATUS LAHAN
         $lahanStatus = Lahan::select(
                 DB::raw("COALESCE(status, 'unknown') as status"),
                 DB::raw('COUNT(*) as total')

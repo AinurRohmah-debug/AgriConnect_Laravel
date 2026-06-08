@@ -132,8 +132,8 @@
                     @if ($lahan->foto_lahan)
                         <div class="bg-gray-50 border border-gray-100 rounded-xl p-3 mb-3">
                             <p class="text-xs text-gray-500 mb-2">Foto saat ini</p>
-                            <img src="{{ asset('storage/' . $lahan->foto_lahan) }}"
-                                class="w-32 h-32 object-cover rounded-lg border">
+                            <img src="{{ asset('uploads/lahan/' . $lahan->foto_lahan) }}"
+                                class="w-32 h-32 object-cover rounded-lg border" alt="Foto Lahan">
                         </div>
                     @endif
 

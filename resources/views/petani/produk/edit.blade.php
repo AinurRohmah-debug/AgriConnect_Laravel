@@ -80,8 +80,8 @@
                                 Foto Produk Saat Ini
                             </p>
 
-                            <img src="{{ asset('storage/' . $produk->foto_produk) }}"
-                                class="w-28 h-28 object-cover rounded-lg border">
+                            <img src="{{ asset('uploads/produk/' . $produk->foto_produk) }}"
+                                class="w-28 h-28 object-cover rounded-lg border" alt="{{ $produk->nama_produk }}">
                         </div>
                     @endif
 
